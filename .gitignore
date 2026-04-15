@@ -1,0 +1,20 @@
+# Ren'Py archivos compilados
+*.rpyc
+*.rpymc
+
+# Carpeta de guardado y temporales
+game/saves/
+game/cache/
+game/bytecode.rpyb
+
+# Archivos de distribución (cuando generas el juego)
+*-dists/
+*-dist/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Logs de errores de Ren'Py
+errors.txt
+traceback.txt
