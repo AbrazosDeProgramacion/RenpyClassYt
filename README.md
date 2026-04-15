@@ -1,2 +1,35 @@
 # RenpyClassYt
-Repositorio de las clases de Ren'Py y prototipo de videojuegos.
+
+# 📚 Curso de Ren'Py desde Cero - Código de Clases
+
+¡Hola! Te doy la bienvenida al repositorio oficial del curso. Aquí encontrarás todo el código fuente, los scripts y los recursos que utilizamos en los tutoriales del canal para que puedas practicar y crear tus propias novelas visuales.
+
+## 📺 Sigue los Tutoriales
+Si llegaste aquí por casualidad y quieres aprender a usar este código, puedes ver las explicaciones paso a paso en mi canal:
+👉 [**https://www.youtube.com/@Bonnie-s2w**]
+
+---
+
+## 📂 Estructura del Repositorio
+El código estará organizado por carpetas para que coincida con cada video del canal.
+
+---
+
+## 🚀 Cómo usar este código
+Cuando suba los videos:
+1.  **Descarga el repositorio:** Puedes descargar todo como un archivo `.zip` en el botón verde que dice "Code" > "Download ZIP".
+2.  **Copia los archivos:** Te recomiendo copiar únicamente el contenido de la carpeta de la clase que te interesa dentro de la carpeta `game/` de tu propio proyecto de Ren'Py.
+3.  **Abre el Launcher:** Inicia Ren'Py y ejecuta el proyecto para ver los resultados.
+
+> [!TIP]
+> Recuerda que para que las imágenes funcionen, deben tener el mismo nombre que usamos en el código o estar en la carpeta de imágenes correspondiente.
+
+---
+
+## ✨ Créditos y Licencia
+Este material es de uso libre para fines educativos y personales. 
+* **Instructora:** Abrazos de Programación por Lily
+* **Licencia:** MIT - ¡Puedes usar este código en tus propios proyectos comerciales o gratuitos!
+
+---
+*Si te sirvió el contenido, ¡no olvides dejar una ⭐ en este repositorio para ayudar a que más personas lo encuentren!*
