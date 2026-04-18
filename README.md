@@ -30,6 +30,12 @@ Cuando suba los videos:
 Este material es de uso libre para fines educativos y personales. 
 * **Instructora:** Abrazos de Programación por Lily
 * **Licencia:** MIT - ¡Puedes usar este código en tus propios proyectos comerciales o gratuitos!
+  
+* **Agradecimientos y Herramientas:**
+
+**Código y Pedagogía:** Desarrollado por **"Abrazos de Programación por Lily"** específicamente para la enseñanza de Ren'Py.
+
+**Recursos (IA)**: Algunos activos visuales y sonoros fueron generados mediante herramientas de Google AI Studio / Flow / Lyria. La atribución es una forma de reconocer el apoyo tecnológico que hizo posible la producción de este material.
 
 ---
 *Si te sirvió el contenido, ¡no olvides dejar una ⭐ en este repositorio para ayudar a que más personas lo encuentren!*
