@@ -13,6 +13,10 @@ Si llegaste aquí por casualidad y quieres aprender a usar este código, puedes 
 ## 📂 Estructura del Repositorio
 El código estará organizado por carpetas para que coincida con cada video del canal.
 
+**Base Teórica de Programación:** Está en la carpeta "Teoría Ren'Py"🚀 
+1- Variables
+
+**Parte prçactica:** Demo de juegos que aplican los conceptos.
 **1º Lolo coge la llave:** Demo que muestra cómo usar los condicionales if/else y demás componentes de Ren'Py
 Videos relacionados:
 - https://www.youtube.com/watch?v=OlGn-6ZNFKY&t=4s  : Componentes de Ren'Py
