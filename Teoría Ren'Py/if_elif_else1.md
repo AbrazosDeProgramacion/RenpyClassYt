@@ -27,10 +27,12 @@ else:
 - Dos puntos (:): Obligatorios al final de cada línea de condición.
 - Indentación: El contenido dentro de cada bloque debe estar alineado a la derecha (usualmente 4 espacios).
 - Operadores de comparación:
-   - == (igual a)
-   -  != (distinto de)
-   -  >= mayor o igual que
-   -  <= menor o igual que
+```
+   == (igual a)
+   != (distinto de)
+   >= mayor o igual que
+   <= menor o igual que
+```
 
 Variables: Puedes verificar variables booleanas directamente como if tiene_llave: (si es True) o if not tiene_llave: (si es False).
 
