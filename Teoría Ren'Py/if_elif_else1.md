@@ -215,7 +215,7 @@ if persistent.final_visto:
 
 Muy útil para inventarios o listas de nombres. En lugar de comparar uno por uno, preguntas si un elemento está dentro de una lista.
 
-'''renpy
+'''python
 
 if "poción" in inventario:
     "Bebes la poción y recuperas vida."
