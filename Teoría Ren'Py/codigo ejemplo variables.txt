@@ -1,0 +1,29 @@
+# --- LO QUE NO CAMBIA ---
+# Usamos 'define' para cosas que son constantes globales, 
+# como el nombre de tu motor o estilos generales.
+define config.name = "Aventura de Chibi"
+
+# --- LO QUE CAMBIA (EL ESTADO) ---
+# Usamos 'default' para variables que el juego debe "recordar" 
+# entre pantallas, saves y loads.
+default monedas = 0
+
+label start:
+    "¡Hola! Tienes [monedas] monedas."
+
+    # Simulamos que el jugador encuentra una moneda
+    $ monedas += 1
+
+    "¡Has encontrado una moneda! Ahora tienes [monedas] monedas."
+
+    # Si aquí guardas y cargas el juego, 
+    # 'default' se asegura de que el valor '1' se mantenga.
+    # Si hubieras usado 'define', esto causaría un error 
+    # o se resetearía a su valor inicial.
+    return
+
+
+
+
+
+    
