@@ -29,7 +29,7 @@ else:
 - Operadores de comparación:
    - == (igual a)
    -  != (distinto de)
-  -   > o < (mayor o menor que).
+   -  >o< (mayor o menor que) 
 
 Variables: Puedes verificar variables booleanas directamente como if tiene_llave: (si es True) o if not tiene_llave: (si es False).
 
