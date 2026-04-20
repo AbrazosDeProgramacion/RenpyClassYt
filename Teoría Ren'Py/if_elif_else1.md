@@ -9,7 +9,7 @@ La sintaxis básica de los condicionales en Ren'Py sigue la estructura lógica d
 - elif (opcional): Significa "si no, si..."; evalúa una nueva condición solo si la anterior fue falsa.
 - else (opcional): Ejecuta un bloque de código si ninguna de las condiciones anteriores se cumplió.
 
-'''renpy
+```python
 
 if puntos >= 10:
     e "¡Felicidades! Conseguiste el mejor final."
@@ -17,7 +17,7 @@ elif puntos >= 5:
     e "Es un final decente."
 else:
     e "Lo siento, este es el final malo."
-'''
+```
 
 
 
@@ -27,9 +27,9 @@ else:
 - Dos puntos (:): Obligatorios al final de cada línea de condición.
 - Indentación: El contenido dentro de cada bloque debe estar alineado a la derecha (usualmente 4 espacios).
 - Operadores de comparación:
-    == (igual a)
-    != (distinto de)
-    > o < (mayor o menor que).
+   - == (igual a)
+   -  != (distinto de)
+  -   > o < (mayor o menor que).
 
 Variables: Puedes verificar variables booleanas directamente como if tiene_llave: (si es True) o if not tiene_llave: (si es False).
 
@@ -40,14 +40,14 @@ Variables: Puedes verificar variables booleanas directamente como if tiene_llave
 
 También puedes usar condiciones para ocultar o mostrar opciones en un menú de decisiones según el estado de una variable:
 
-'''renpy
+```python
 
 menu:
     "Ir al parque":
         jump parque
     "Entrar a la casa" if tiene_llave:
         jump casa
-'''
+```
 
 
 Para asegurar que tus variables funcionen correctamente, recuerda definirlas siempre **antes** de la etiqueta label start: usando la palabra clave default.
@@ -66,7 +66,7 @@ Es el uso más común para ramificar la historia basado en variables.
 
 Modo de redactar:
 
-'''renpy
+```python
 
 if puntos_amor >= 10:
     "Ella te sonríe cálidamente."
@@ -75,7 +75,7 @@ elif puntos_amor > 5:
 else:
     "Ella te ignora por completo."
 
-'''
+```
 
 2. En Menús de Elección (Condiciones de Opción)
 
@@ -85,14 +85,14 @@ Puedes ocultar o mostrar opciones específicas dentro de un menu basándote en s
 
 Modo de redactar:
 
-'''renpy
+```python
 
 menu:
     "Hablar con ella":
         jump charla
     "Usar la llave mágica" if tiene_llave: # Solo aparece si 'tiene_llave' es True
         jump secreto
-'''
+```
 
 
 3. En Pantallas e Interfaz (Screen Language)
@@ -103,14 +103,14 @@ Ubicación: Dentro de bloques screen, vbox, hbox o frame.
 
 Modo de redactar:
 
-'''renpy
+```python
 
 screen info_personaje():
     vbox:
         text "Nombre: [nombre_jugador]"
         if nivel_veneno > 0:
             text "¡ESTÁS ENVENENADO!" color "#f00"
-'''
+```
 
 
 4. Condicionales de una sola línea (Python Inline)
@@ -121,11 +121,11 @@ Sintaxis: $ variable = valor_si_cierto if condicion else valor_si_falso.
 
 Modo de redactar:
 
-'''renpy
+```python
 
 $ estado_animo = "Feliz" if puntos > 5 else "Triste"
 
-'''
+```
 
 5. Dentro de Diálogos (Interpolación y Etiquetas de Texto)
 
@@ -133,19 +133,18 @@ Ren'Py permite variar palabras específicas dentro de una misma frase sin duplic
 
 Modo nativo (Interpolación):
 
-'''renpy
+```python
 
 $ genero = "o" if es_hombre else "a"
 "Bienvenid[genero] al club de literatura."
-'''
+```
 
 
 Uso de etiquetas {if}: (Requiere versiones modernas de Ren'Py o addons específicos).
 
-renpy
-'''
+```python
 "Te ves {if salud < 20}muy mal{else}bastante bien{/if} hoy."
-'''
+```
 
 
 6. En Definiciones de Personajes e Imágenes
@@ -154,23 +153,23 @@ Puedes usar condicionales para determinar qué nombre o imagen mostrar dinámica
 
 Nombres dinámicos:
 
-'''renpy
+```python
 
 define p = Character("[nombre_personaje]") # Cambia si la variable cambia
-'''
+```
 
 
 
 7. Imágenes condicionales (ConditionSwitch): Permite que una imagen cambie automáticamente según variables.
 
-'''renpy
+```python
 
 image protagonista = ConditionSwitch(
     "puntos > 10", "prota_feliz.png",
     "True", "prota_serio.png" # El 'True' final actúa como un 'else'
 )
 
-'''
+```
 
 Para dominar los condicionales en Ren'Py, existen tres conceptos "avanzados" que separan a un principiante de un programador eficiente:
 
@@ -189,14 +188,14 @@ No estás limitado a una sola condición. Puedes combinar varias en una misma l�
 
 Cuando defines imágenes que cambian según variables, Ren'Py usa una sintaxis de lista. El último elemento siempre debe ser "True" para actuar como un else (el caso por defecto), de lo contrario, el juego podría dar error si ninguna condición se cumple.
 
-'''renpy
+```python
 
 image fondo_dinamico = ConditionSwitch(
     "tiempo == 'noche'", "fondo_oscuro.jpg",
     "True", "fondo_dia.jpg"
 )
 
-'''
+```
 
 3. Persistencia (persistent)
 
@@ -204,22 +203,22 @@ Puedes usar if/else con variables que "recuerdan" lo que pasó en otras partidas
 
 Sintaxis: Se usa el prefijo persistent.
 
-'''renpy
+```python
 
 if persistent.final_visto:
     "Ya conoces este destino, pero algo se siente diferente..."
 
-'''
+```
 
 4. Verificación de "Pertenencia" (in)
 
 Muy útil para inventarios o listas de nombres. En lugar de comparar uno por uno, preguntas si un elemento está dentro de una lista.
 
-'''python
+```python
 
 if "poción" in inventario:
     "Bebes la poción y recuperas vida."
-'''
+```
 
 
 5. El peligro de la Indentación
