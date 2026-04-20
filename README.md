@@ -17,7 +17,10 @@ El código estará organizado por carpetas para que coincida con cada video del 
    
    1.1. Variables
 
-2. **Parte práctica:** Demo de juegos que aplican los conceptos.
+   1.1.1 Ejemplo variables (define vs default) demo
+   (copia el contenido de "codigo ejemplo variables.txt" a "script.rpy")
+
+3. **Parte práctica:** Demo de juegos que aplican los conceptos.
    
    2.1. **Lolo coge la llave:** Demo que muestra cómo usar los condicionales if/else y demás componentes de Ren'Py
 Videos relacionados:
