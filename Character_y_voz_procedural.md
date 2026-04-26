@@ -9,7 +9,7 @@ init python:
             volumen = random.uniform(0.7, 1.0)
             renpy.sound.set_volume(volumen, delay=0, channel="sound")
             
-            # Crea una lista con 3 tonos aleatorios
+            # Crea una lista con 4 tonos aleatorios
             beeps = ["audio/lolo_{}.ogg".format(random.choice(["bajo", "medio", "agudo", "muy agudo"])) for _ in range(3)]
             
             # Los reproduce todos a la vez (como un acorde rápido)
