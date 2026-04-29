@@ -1,0 +1,239 @@
+﻿init python:
+    # Definimos el tamaño de cada "tile" en píxeles.
+    TILE_SIZE = 32
+
+    # --- NUEVO: Lista de mapas de niveles ---
+    # Cada elemento en esta lista es un mapa de un nivel.
+    # Puedes añadir más mapas aquí para más niveles.
+    mapas_de_niveles = [
+        # Nivel 1
+        [
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'G', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'B', 'B', 'B', 'B', 'E', 'E', 'E', 'C', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'C', 'E', 'E', 'E', 'E', 'E', 'B', 'B', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'G', 'E', 'E', 'E', 'E', 'E'],
+            ['M', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'], # El suelo
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E']
+        ],
+        # Nivel 2 (Ejemplo de un nuevo nivel, puedes cambiarlo)
+        [
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'G', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'C', 'E', 'B', 'B', 'B', 'B', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'B', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'B', 'B', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'G', 'E', 'E', 'E', 'E', 'E', 'E', 'C', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'M'], # Suelo y Mario al final
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E']
+        ]
+        # Puedes añadir más niveles aquí:
+        # , [
+        #   # Nuevo Nivel 3...
+        # ]
+    ]
+
+    # Variables globales para el estado del juego.
+    global mario_pos_x, mario_pos_y, puntuacion, nivel_mapa, goombas, nivel_actual, monedas_restantes
+    
+    # Inicialización de las listas y variables
+    goombas = []
+    puntuacion = 0
+    mario_start_x = -1
+    mario_start_y = -1
+    # --- NUEVO: Nivel actual (comenzamos en el índice 0) ---
+    nivel_actual = 0 
+    monedas_restantes = 0 # Para llevar un control de las monedas en el nivel actual
+
+    # --- NUEVO: Función para cargar un nivel ---
+    def cargar_nivel(num_nivel):
+        global nivel_mapa, goombas, mario_pos_x, mario_pos_y, mario_start_x, mario_start_y, monedas_restantes
+
+        if num_nivel >= len(mapas_de_niveles):
+            # Si no hay más niveles, el juego ha terminado.
+            # Puedes añadir aquí una pantalla de "¡Has ganado!" o regresar al menú principal.
+            print("¡Juego Completado! Todos los niveles superados.")
+            renpy.call("game_complete_screen") # Llama a una pantalla de fin de juego (tendrás que crearla)
+            return False # Indica que no se pudo cargar el nivel (porque se acabó el juego)
+        
+        # Reiniciar variables para el nuevo nivel
+        goombas = []
+        monedas_restantes = 0
+        mario_start_x = -1
+        mario_start_y = -1
+
+        # Cargar el mapa del nuevo nivel (hacemos una copia para no modificar el original)
+        # La copia profunda es importante para no modificar los mapas originales en la lista.
+        import copy
+        nivel_mapa = copy.deepcopy(mapas_de_niveles[num_nivel])
+
+        # Recorremos el mapa del nuevo nivel para encontrar la posición de Mario, Goombas y contar monedas.
+        for r_idx, row in enumerate(nivel_mapa):
+            for c_idx, char in enumerate(row):
+                if char == 'M':
+                    mario_start_x = c_idx
+                    mario_start_y = r_idx
+                    nivel_mapa[r_idx][c_idx] = 'E' # Cambiamos 'M' a 'E' en el mapa del juego
+                elif char == 'G':
+                    goombas.append({'x': c_idx, 'y': r_idx, 'dx': 1})
+                    nivel_mapa[r_idx][c_idx] = 'E' # Cambiamos 'G' a 'E' en el mapa del juego
+                elif char == 'C':
+                    monedas_restantes += 1 # Contamos las monedas para este nivel
+        
+        # Inicializar la posición actual de Mario.
+        mario_pos_x = mario_start_x
+        mario_pos_y = mario_start_y
+        
+        # Asegurarse de que Mario tenga una posición inicial válida
+        if mario_start_x == -1 or mario_start_y == -1:
+            raise Exception("Error: No se encontró la posición inicial de Mario ('M') en el Nivel {0}.".format(num_nivel))
+        
+        print("Nivel {num_nivel + 1} cargado. Monedas: {monedas_restantes}, Goombas: {len(goombas)}")
+        return True # Indica que el nivel se cargó correctamente
+
+    # --- Fin NUEVO ---
+    
+    # Función para mover a Mario.
+    def mover_mario(dx, dy):
+        global mario_pos_x, mario_pos_y, nivel_mapa, puntuacion, goombas, monedas_restantes, nivel_actual
+
+        tentative_x = mario_pos_x + dx
+        tentative_y = mario_pos_y + dy
+
+        if 0 <= tentative_x < len(nivel_mapa[0]) and 0 <= tentative_y < len(nivel_mapa):
+            tipo_tile_destino = nivel_mapa[tentative_y][tentative_x]
+
+            if tipo_tile_destino == 'B':
+                pass 
+            
+            elif tipo_tile_destino == 'C':
+                mario_pos_x = tentative_x
+                mario_pos_y = tentative_y
+                nivel_mapa[tentative_y][tentative_x] = 'E'
+                puntuacion += 100
+                monedas_restantes -= 1 # --- NUEVO: Decrementamos las monedas restantes ---
+                print("Moneda recogida. Monedas restantes: {monedas_restantes}")
+
+                # --- NUEVO: Verificar si se han recogido todas las monedas para pasar de nivel ---
+                if monedas_restantes <= 0:
+                    print("¡Todas las monedas recogidas! Pasando al siguiente nivel...")
+                    nivel_actual += 1
+                    # Cargar el siguiente nivel. Si retorna False, significa que el juego terminó.
+                    if not cargar_nivel(nivel_actual):
+                        return # Salimos de la función si el juego terminó.
+            
+            else: # Si es 'E' (vacío) o 'G' (Goomba)
+                goomba_aplastado = False
+                for i, goomba in enumerate(goombas):
+                    if goomba['x'] == tentative_x and goomba['y'] == tentative_y:
+                        goombas.pop(i)
+                        goomba_aplastado = True
+                        break
+
+                if goomba_aplastado:
+                    mario_pos_x = tentative_x
+                    mario_pos_y = tentative_y
+                    puntuacion += 200
+                
+                else: # Si es espacio vacío y no hay Goomba
+                    mario_pos_x = tentative_x
+                    mario_pos_y = tentative_y
+            
+    # Función para mover a todos los Goombas
+    def mover_goombas():
+        global nivel_mapa, goombas, mario_pos_x, mario_pos_y, mario_start_x, mario_start_y
+
+        # print("\n--- INICIO CICLO MOVER_GOOMBAS ---") # Puedes activar estos para depurar
+        # print("Goombas antes del movimiento: {0}".format([(g['x'], g['y'], g['dx']) for g in goombas]))
+
+        goombas_vivos = [] 
+
+        for i, goomba in enumerate(goombas):
+            # print("Procesando Goomba {0}: Pos ({1}, {2}), Dir {3}".format(i, goomba['x'], goomba['y'], goomba['dx']))
+            
+            nueva_goomba_x = goomba['x'] + goomba['dx']
+            
+            choca_con_bloque_o_borde = False
+        
+            if not (0 <= nueva_goomba_x < len(nivel_mapa[0])):
+                choca_con_bloque_o_borde = True
+                # print("Goomba {0} choca con borde. Nueva_x: {1}".format(i, nueva_goomba_x))
+            elif nivel_mapa[goomba['y']][nueva_goomba_x] == 'B':
+                choca_con_bloque_o_borde = True
+                # print("Goomba {0} choca con bloque en ({1}, {2})".format(i, nueva_goomba_x, goomba['y']))
+
+            if choca_con_bloque_o_borde:
+                goomba['dx'] *= -1
+                # print("Goomba {0} dirección invertida a {1}".format(i, goomba['dx']))
+                nueva_goomba_x = goomba['x'] + goomba['dx']
+                # print("Goomba {0} recalcula nueva_goomba_x a {1}".format(i, nueva_goomba_x))
+            
+            goomba['x'] = nueva_goomba_x
+            # print("Goomba {0} movido a: ({1}, {2})".format(i, goomba['x'], goomba['y']))
+            
+            if goomba['x'] == mario_pos_x and goomba['y'] == mario_pos_y:
+                # print("¡Goomba {0} colisionó con Mario en ({1}, {2})! Mario reiniciado.".format(i, mario_pos_x, mario_pos_y))
+                mario_pos_x = mario_start_x
+                mario_pos_y = mario_start_y
+            else:
+                goombas_vivos.append(goomba)
+                # print("Goomba {0} añadido a goombas_vivos. Current goombas_vivos: {1}".format(i, [g['x'] for g in goombas_vivos]))
+        
+        goombas = goombas_vivos
+        # print("Goombas después de limpiar: {0}".format([(g['x'], g['y'], g['dx']) for g in goombas]))
+        # print("--- FIN CICLO MOVER_GOOMBAS ---\n")
+
+# Define la pantalla principal del juego.
+screen game_screen():
+    # Este timer llamará a la acción Function(mover_goombas) cada 0.2 segundos.
+    timer 0.2 action Function(mover_goombas) repeat True
+
+    fixed:
+        for r_idx, row in enumerate(nivel_mapa):
+            for c_idx, char in enumerate(row):
+                if char == 'E':
+                    add "empty_tile.png" xpos (c_idx * TILE_SIZE) ypos (r_idx * TILE_SIZE)
+                elif char == 'B':
+                    add "block_tile.png" xpos (c_idx * TILE_SIZE) ypos (r_idx * TILE_SIZE)
+                elif char == 'C':
+                    add "coin_tile.png" xpos (c_idx * TILE_SIZE) ypos (r_idx * TILE_SIZE)
+
+        # Añade la imagen de Mario en su posición actual.
+        add "mario_standing.png" xpos (mario_pos_x * TILE_SIZE) ypos (mario_pos_y * TILE_SIZE)
+        
+        # Dibuja cada Goomba de la lista 'goombas'.
+        for goomba in goombas:
+            add "goomba_tile.png" xpos (goomba['x'] * TILE_SIZE) ypos (goomba['y'] * TILE_SIZE)
+        
+        # Muestra la puntuación actual.
+        text "Puntuación: [puntuacion]\nNivel: [nivel_actual + 1]" xpos 10 ypos 10 size 24 color "#FFFFFF"
+
+        # Detección de teclas para mover a Mario.
+        key "K_LEFT" action Function(mover_mario, -1, 0)
+        key "K_RIGHT" action Function(mover_mario, 1, 0)
+        key "K_UP" action Function(mover_mario, 0, -1)
+        key "K_DOWN" action Function(mover_mario, 0, 1)
+
+
+label start:
+    $ renpy.startup_pause = False
+    
+    # --- NUEVO: Carga el primer nivel al inicio del juego ---
+    # La función cargar_nivel ahora se encarga de configurar mario_pos_x, mario_pos_y, goombas, etc.
+    python:
+        # Iniciamos el primer nivel (nivel_actual = 0)
+        global nivel_actual
+        nivel_actual = 0
+        cargar_nivel(nivel_actual)
+
+    call screen game_screen() 
+
+    "¡Juego Terminado!" # Solo se llega aquí si la pantalla game_screen se oculta o si se llama a hide screen.
+    return
+
+label game_complete_screen:
+    "Ganaste!!!!!"
+    "Es hora de celebrar."
+    "Hasta pronto"
+    return
