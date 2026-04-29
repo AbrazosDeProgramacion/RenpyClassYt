@@ -1,0 +1,112 @@
+﻿define persistent.palabra= set()
+
+init python:
+    config.hyperlink_handlers["play"] = renpy.play  #Los sonidos están vinculados al hyperlink handlers.
+
+screen glossary():
+    text "Glossary" size 40 xalign 0.5 ypos 20
+    hbox spacing 200:
+        viewport:
+            xpos 50 ypos 100 xsize 300 ysize 500
+            child_size (None, 4000)
+            scrollbars "vertical"
+            spacing 5
+            draggable True
+            mousewheel True
+            arrowkeys True
+            add "#000c"
+            vbox spacing 20:
+                #for word in sorted(persistent.palabra): # funciona sólo con datos persistentes, sin nada especial
+                #for word in sorted(persistent.palabra, reverse=True) : # cambia el orden de la presentación
+                for word in sorted(persistent.palabra, key=str.lower) :  # orden de la lista  :D 
+                    textbutton word:
+                        action SetVariable("display_desc", word)
+        vbox ypos 100 xsize 650 ysize 500 box_wrap True:
+            text glossary_dict.get(display_desc, "")
+
+init -1 python:
+
+    display_desc = ""
+    
+    ######################################################
+    # Elige sólo una alternativa para generar la voz:   ##
+    ######################################################
+    # Option 1: Pronunciación con efecto robótico                  ##
+    #-----------------------------------------------------------------------##
+    def play(tag, argument, contents):                                   ##
+        renpy.play(argument)                                                    ##
+        return contents                                                            ##
+                                                                                             ##
+    config.custom_text_tags["play"] = play                             ##
+    #----------------------------------------------------------------------##
+    #####################################################
+    # Option 2: Pronunciación normal                                  ##
+    #---------------------------------------------------------------------##
+    config.hyperlink_handlers["play"] = renpy.play                ##
+    #---------------------------------------------------------------------##
+    ####################################################
+
+    #add words to the dictionary
+    glossary_dict = \
+        {
+        ##################################################################
+        # Si eliges la primera opción:
+        #'cocinar': '{play=audio/cocinar.mp3}Definición de cocinar{/play}',
+        #Si eliges la segunda opción:
+        #'cocinar': '{a=play:cocinar.mp3}Definición de cocinar{/a}',
+        ##################################################################
+        
+        'cortar': '{play=audio/a.ogg}Definición de cortar{/play}',
+        'a':'{play=audio/b.ogg}Definición de a{/play}',
+        'cocinar':'{play=audio/c.ogg}DEFINITION SAY OR WHATEVER{/play}',
+        
+        }
+
+
+
+
+label start:
+
+    show screen glossary
+    "¿?"
+    "¿Nada?"
+    hide screen glossary
+    "¿No funciona?"
+    "Quizás..."
+    jump verificando_palabras
+
+
+
+label verificando_palabras:
+
+    "Veamos..."
+
+    $ persistent.palabra.add('cocinar')
+    show screen glossary
+    "'cocinar' verbo incluído en el glosario."
+
+    #$ persistent.palabra.remove('cocinar') ##: Para quitar la palabra "cocinar"
+    "Yay!!!! ♥"
+
+    hide screen glossary
+    
+    "Y si agrego cortar'..."
+    $ persistent.palabra.add('cortar')
+    "..."
+    show screen glossary
+    "Oh! Agrega 'cortar'."
+    "¡¡¡¡¡AAAAHHHHHH!!!!! Funciona!!!!!  :D"
+    hide screen glossary
+    
+    "Y si agrego 'a'..."
+    $ persistent.palabra.add('a')
+    "..."
+    show screen glossary
+    "¡Funciona~.... ♥!"
+    "¿Fin?"
+
+    
+    return
+
+
+
