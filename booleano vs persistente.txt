@@ -1,0 +1,54 @@
+default tiene_llave = False
+default puerta_abierta = False
+
+
+label start:
+    "Estás explorando una mazmorra oscura."
+
+    # --- COMPROBACIÓN DE PERSISTENCIA ---
+    # ¿Ha encontrado la llave alguna vez en alguna partida pasada?
+    if persistent.encuentro_llave_alguna_vez:
+        "Tienes el presentimiento de que ya has estado aquí antes..."
+    else:
+        "Todo te resulta completamente nuevo."
+
+    jump buscar_llave
+
+label buscar_llave:
+    "Encuentras una llave brillante en el suelo."
+
+    menu:
+        "Coger la llave":
+            # VARIABLE NORMAL: Cambia el estado para ESTA partida.
+            $ tiene_llave = True
+            
+            # VARIABLE PERSISTENTE: Queda grabada para SIEMPRE en la PC del jugador.
+            $ persistent.encuentro_llave_alguna_vez = True
+            
+            "Guardas la llave en tu bolsillo."
+            
+        "Dejar la llave":
+            "Decides que no te hace falta y sigues adelante."
+
+    jump puerta
+
+label puerta:
+    "Llegas a una enorme puerta de madera cerrada con candado."
+
+    if tiene_llave:
+        "Usas la llave y la puerta se abre."
+        $ puerta_abierta = True
+        jump habitacion_secreta
+    else:
+        "Está cerrada. No tienes forma de abrirla sin una llave."
+        jump fin_partida
+
+label habitacion_secreta:
+    "Dentro de la habitación hay un cofre con un escudo mágico."
+    jump fin_partida
+
+label fin_partida:
+    "Fin de la partida."
+    
+    # Para probar el ejemplo, Ren'Py volverá al menú principal.
+    return
