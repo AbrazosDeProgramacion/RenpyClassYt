@@ -1,0 +1,174 @@
+# --- LÓGICA DE ACTUALIZACIÓN (PYTHON) ---
+init python:
+    import random
+    import pygame
+
+    debug_mode = False
+
+    def toggle_debug():
+        global debug_mode
+        debug_mode = not debug_mode
+
+    def update_game():
+        global player_x, player_y, speed, score, road_scroll, enemigos, game_over
+
+        if game_over:
+            return
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            player_x -= 0.008
+        if keys[pygame.K_RIGHT]:
+            player_x += 0.015
+        if keys[pygame.K_UP]:
+            speed = min(speed + 0.1, 10.0)
+        else:
+            speed = max(speed - 0.05, 2.0)
+        
+        player_x = max(0.1, min(player_x, 0.8))
+        road_scroll += speed * 0.01
+        score += int(speed)
+
+        # ---------------------------------------------------------
+        # LA NUEVA LÓGICA DE SPAWN (APARICIÓN) CON DISTANCIA
+        # ---------------------------------------------------------
+        puede_spawnear = False
+        
+        # 1. Primero, tiramos el dado aleatorio
+        if random.random() < 0.05 * (speed / 5.0):
+            puede_spawnear = True
+            
+        # 2. Si el dice dice que sí, comprobamos la distancia con el último enemigo
+        if puede_spawnear and len(enemigos) > 0:
+            # Obtenemos la "Y" del último enemigo de la lista
+            ultimo_enemigo_y = enemigos[-1]["y"]
+            
+            # DEFINIMOS LA DISTANCIA MÍNIMA (Ajustable)
+            # Como los coches miden 0.12 de alto, los forzamos a estar separados por 0.25
+            distancia_minima = 0.25 
+            
+            if (ultimo_enemigo_y - (-0.1)) < distancia_minima:
+                # Si el último enemigo está muy cerca de arriba, CANCELAMOS el spawn
+                puede_spawnear = False
+
+        # 3. Solo si pasó la prueba de distancia, creamos el enemigo
+        if puede_spawnear:
+            lane = random.choice([0.2, 0.4, 0.6, 0.8])
+            enemigos.append({"x": lane, "y": -0.1})
+        # ---------------------------------------------------------
+
+        # Tamaños de colisión (moto, auto o lo que quieras XD)
+        coche_ancho = 0.01 
+        coche_alto = 0.05
+
+        for enemigo in enemigos:
+            enemigo["y"] += speed * 0.001
+
+            # Lógica de colisión AABB
+            jugador_izq = player_x - (coche_ancho / 2)
+            jugador_der = player_x + (coche_ancho / 2)
+            jugador_arriba = player_y - coche_alto
+            jugador_abajo = player_y
+
+            enemigo_izq = enemigo["x"] - (coche_ancho / 2)
+            enemigo_der = enemigo["x"] + (coche_ancho / 2)
+            enemigo_arriba = enemigo["y"] - coche_alto
+            enemigo_abajo = enemigo["y"]
+
+            if (jugador_izq < enemigo_der and 
+                jugador_der > enemigo_izq and 
+                jugador_arriba < enemigo_abajo and 
+                jugador_abajo > enemigo_arriba):
+                
+                game_over = True
+
+        enemigos = [e for e in enemigos if e["y"] < 1.2]
+
+
+# --- PANTALLA DEL JUEGO CON DEBUG ---
+screen game_road_fighters():
+    modal True
+    zorder 100
+
+    key "D" action Function(toggle_debug)
+
+    add "#9DA2A2"
+
+    viewport:
+        xalign 0.5
+        xsize 0.5
+        ysize 1.0
+        scrollbars None
+        mousewheel False
+        clipping True
+
+        fixed:
+            yfit True
+            add "carretera":
+                yoffset int(road_scroll * 100) % 1080
+                xsize 1.0
+            add "carretera":
+                yoffset int(road_scroll * 100) % 1080 - 1080
+                xsize 1.0
+
+    add "coche_jugador":
+        xpos player_x xanchor 0.5
+        ypos player_y yanchor 1.0
+
+    for enemigo in enemigos:
+        add "coche_enemigo":
+            xpos enemigo["x"] xanchor 0.5
+            ypos enemigo["y"] yanchor 1.0 
+
+    if debug_mode:
+        frame:
+            background "#00FF0044"
+            xpos (player_x - (coche_ancho / 2))
+            ypos (player_y - coche_alto)
+            xsize coche_ancho
+            ysize coche_alto
+
+        for enemigo in enemigos:
+            frame:
+                background "#FF000044"
+                xpos (enemigo["x"] - (coche_ancho / 2))
+                ypos (enemigo["y"] - coche_alto)
+                xsize coche_ancho
+                ysize coche_alto
+
+
+    vbox:
+        xalign 0.5 yalign 0.01
+        text "Puntuación: [score]" size 32 color "#FFFFFF"
+        text "Velocidad: [speed:,.1f]" size 32 color "#FFFFFF"
+
+    if game_over:
+        frame:
+            background "#00000088"
+            xalign 0.5 yalign 0.5
+            xsize 500 ysize 250
+            padding (30, 30)
+            vbox:
+                xalign 0.5 yalign 0.5
+                text "GAME OVER" size 60 xalign 0.5 color "#FF0000"
+                text "Puntuación final: [score]" size 30 xalign 0.5 color "#FFFFFF"
+                textbutton "Reiniciar" xalign 0.5 text_size 30 action [SetVariable("game_over", False), Jump("start")]
+                textbutton "Menú Principal" xalign 0.5 text_size 30 action Return()
+
+    timer 0.016 repeat True action Function(update_game)
+
+
+label start:
+    scene black
+    "Bienvenido a Road Fighters: Ren'Py Edition."
+    "Usa las flechas IZQUIERDA y DERECHA para moverte, y ARRIBA para acelerar."
+    
+    $ player_x = 0.45
+    $ player_y = 0.8
+    $ speed = 0.0
+    $ score = 0
+    $ road_scroll = 0.0
+    $ enemigos = []
+    $ game_over = False
+
+    call screen game_road_fighters
