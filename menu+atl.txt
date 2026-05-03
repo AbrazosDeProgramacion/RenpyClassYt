@@ -1,0 +1,91 @@
+#--------------------------------------------------------------------
+# Guarda este screen en un archivo aparte: por ejemplo: 5_screens.rpy
+#---------------------------------------------------------------------
+
+screen choice(items):
+    style_prefix "choice"
+
+    fixed:
+        xysize (1920, 1080) # O el tamaño de tu resolución
+
+        vbox:
+            # Centramos la caja en el centro de la pantalla
+            xalign 0.5
+            yalign 0.5
+            
+            # El espaciado va aquí, dentro del vbox
+            spacing 20 
+
+            for i in items:
+                button:
+                    # Alineación del botón dentro de su contenedor
+                    xalign 0.5
+                    yalign 0.5
+                    
+                    # Fondos independientes (puedes usar tu función aquí)
+                    idle_background Frame("gui/boton_base.png", 5, 25, 25, 25)
+                    hover_background Frame("gui/boton_brillante.png", 5, 25, 25, 25)
+                    
+                    # Relleno interno (Padding) para que el botón no quede pegado al texto
+                    top_padding 50
+                    bottom_padding 50
+                    left_padding 50
+                    right_padding 50
+                    
+                    at entrada_suave, resaltado_boton
+                    action i.action
+                    
+                    text i.caption:
+                        size 35
+                        xalign 0.5
+                        yalign 0.5
+                        idle_color "#ffffff"
+                        hover_color "#ffcc00"
+
+
+
+###############################################
+#--------------------------------------------------------------------
+# Guarda este screen en un archivo aparte: ej 20_ATL.rpy
+#--------------------------------------------------------------------
+
+# Animación para que el botón aparezca suavemente desde la izquierda
+transform entrada_suave:
+    alpha 0.0 xoffset -20  # Empieza invisible y un poco a la izquierda
+    linear 0.5 alpha 1.0 xoffset 0  # En medio segundo aparece y se coloca en su sitio
+
+# Animación para cuando pasamos el mouse por encima (Efecto de pulso)
+transform resaltado_boton:
+    on hover:
+        linear 0.2 zoom 1.05  # Crece un poquito suavemente
+    on idle:
+        linear 0.2 zoom 1.0   # Vuelve a su tamaño original
+
+
+##################################################
+# script.rpy
+
+label decision_menu:
+    "¿Dónde quieres ir?"
+    menu:
+        "Ir al bosque":
+            jump ir_al_bosque
+        "Quedarse en el pueblo":
+            # ¡NO USES CALL! o se repetirá cuantas 
+            # veces hayas hecho clic cuando eligas
+            # a continuación jump
+            jump start
+        
+
+
+label ir_al_bosque:
+    "Estoy en el bosque..."
+    "Fin"
+    return
+
+label start:
+    jump decision_menu
+    "No estoy preparado para salir."
+    "*Planea una estrategia para sobrevivir en el bosque*"
+    "¿Fin?"
+    return
