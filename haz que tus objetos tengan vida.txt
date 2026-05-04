@@ -1,0 +1,64 @@
+####################################
+# Imagebutton con ATL y Return()
+#----------------------------------------------------------------------------
+# Al poner el texto condicionado (if llaves_encontradas == 0: / else:) 
+# dentro del screen, Ren'Py redibuja la pantalla en cuanto ejecutas el SetVariable. 
+# Por lo tanto, el texto cambiará de inmediato a "¡Genial! Ahora tienes 1 llave...".
+#----------------------------------------------------------------------------
+
+default llaves_encontradas = 0
+
+# Esto le dice a Ren'Py: "Muestra la imagen 0.2 segundos, luego la 1 otros 0.2s, y repite"
+image llave_animada:
+    "llave_idle.png"
+    pause 0.2
+    "llave_idle1.png"
+    pause 0.2
+    "llave_idle2.png"
+    pause 0.2
+    "llave_idle3.png"
+    pause 0.2
+    repeat
+
+# El brillo debe estar fuera de la identación del imagebutton
+image brillo_parpadeante:
+    "brillo.png"
+    alpha 0.0 
+    pause 0.5
+    linear 0.4 alpha 1.0  
+    pause 0.3
+    linear 0.4 alpha 0.0  
+    pause 0.5
+    repeat
+
+screen minijuego_llaves():
+    fixed:
+        xalign 0.5 yalign 0.4
+        # Tamaño de la llave 
+        xysize (100, 100) 
+        
+        #La llave animada (el botón interactivo)
+        imagebutton:
+            idle "llave_animada"
+            hover "llave_hover.png"
+            # Ocupa todo el espacio del contenedor
+            xysize (100, 100)
+            action [SetVariable("llaves_encontradas", 1), 
+                Notify("¡Llave encontrada!"),
+                Return()]
+            
+    # El brillo parpadeante (decorativo, no se puede hacer clic)
+    add "brillo_parpadeante" xalign 0.51 yalign 0.42
+        
+    # Texto dinámico
+    if llaves_encontradas == 0:
+        text "Lolo está buscando algo especial en el jardín...":
+            xalign 0.5 yalign 0.6 size 40 
+    else:
+        text "¡Genial! Ahora tienes [llaves_encontradas] llave en tu poder.":
+            xalign 0.5 yalign 0.6 size 40
+
+label start:
+    call screen minijuego_llaves
+    "Haz clic cuando termines."
+    return
