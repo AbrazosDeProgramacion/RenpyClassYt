@@ -1,0 +1,619 @@
+# Copia el contenido de este script a un nuevo proyecto.
+# Tamaño de imágenes: 90 x 90 pixeles.
+# Cualquier duda, comenta en el canal de Youtube: https://www.youtube.com/@Bonnie-s2w
+
+define gui.interface_text_outlines = [(2, "#000000", 0, 0)]
+define gui.text_outlines = [(3, "#000", 0, 0)]
+define gui.text_color = '#fff'
+
+# Declaración de imágenes
+init:
+    define m = Character("Marcus")
+    define t = Character("Lolo", color="#0000FF")
+    define Magi = Character("Lala")
+
+    # Imágenes del fondo y tiles
+    image bg_level1_parallax = "images/bg_level1_parallax.png"
+    image block_tile = "images/block_tile.png"
+    image coin_tile = "images/coin_tile.png"
+    #image toad_standing = "images/toad_standing.png"
+    image tienda_img ="images/tienda.png"
+
+    image lolo_sp = "images/lolo_sp.png"
+    image marcus_sp = "images/marcus_sp.png"
+    
+    # Imagen de debug (rejilla)
+    image grid_tile_debug = Solid("#00FF0020") 
+
+# ------------------------------------------------------------
+# ------------------------------------------------------------
+# LÓGICA DEL JUEGO SIMPLIFICADA (Sin uso de "global")
+# ------------------------------------------------------------
+# LÓGICA DEL JUEGO SIMPLIFICADA (Sin uso de "global")
+init python:
+    # --- Configuración ---
+    SCREEN_WIDTH = 1920
+    SCREEN_HEIGHT = 1080
+    TILE_SIZE = 90
+
+    # --- Variables de Estado ---
+    store.debug_mode = False
+    store.puntuacion = 0
+    store.game_over = False
+    store.vida = 100
+    # Inventario
+    store.inventario = {}
+    store.oro_actual = 100 
+    
+    store.mensaje_tienda = ""
+    store.color_mensaje_tienda = "#000"
+    
+    # Posición de Mario
+    store.mario_pos_x = 0
+    store.mario_pos_y = 10
+    store.mario_direccion = "abajo"
+    store.mario_estado = "caminando"
+    store.mario_ultimo_movimiento = 0
+    
+    # Cámara
+    store.camera_x_offset = 0
+    store.camera_y_offset = 0
+    
+    # Toad
+    store.toad_pos_x = 25
+    store.toad_pos_y = 10
+
+    # -----------------------------
+    store.toad_siguiendo = False # Nos dice si Toad debe seguirnos
+    store.historial_mario = []    # Guarda los pasos que da Mario (lista de coordenadas)
+    store.toad_tick_movimiento = 0 # Contador para que Toad camine más lento
+    store.toad_velocidad_seguimiento = 4 # Toad se mueve cada 4 ticks (más lento que Mario)
+    #------------------------------
+
+    store.toad_velocidad_seguimiento = 4 
+    store.toad_ultimo_dialogo = 0       # Guarda el tiempo de su última frase
+    store.toad_intervalo_dialogo = 1.0   # Segundos mínimos entre frases (puedes subirlo si habla mucho)
+
+    ###################
+    store.mario_traje_especial = False    # Indica si lleva el traje puesto
+    store.mario_traje_duracion = 0        # El tiempo que le queda al traje
+    store.mario_traje_max_duracion = 300  # Duración en "ticks" del juego (300 ticks = 15 segundos aprox)
+    
+    # Lista de frases aleatorias que dirá Toad mientras camina
+    store.dialogos_toad_caminando = [
+        "¡Vamos, Marcus!✨",
+        "¡Tú puedes!🍀",
+        "Sigue tus sueños 🧙",
+        "Comenta si es útil ❤️",
+        "Suscríbete si te gusta❤️",
+        "¡Busquemos una tienda!🙏🏻",
+        "No te separes mucho, por favor.🙏🏻",
+        "¡Tú eres el líder, Marcus!❤️"
+    ]
+
+    # --- Variables de animación de TOAD ---
+    store.toad_direccion = "abajo" # Por defecto mira abajo
+    store.toad_estado = "idle"     # Por defecto está quieto
+    #-------------------------------
+
+    # --- Mapa Simplificado ---
+    store.mapas_de_niveles = [
+        [
+            ['S', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'B', 'B', 'B', 'B', 'E', 'E', 'E', 'C', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'C', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'B', 'B', 'B', 'B', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+            ['M', 'E', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'T', 'B', 'B', 'B', 'E'],
+            ['E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E', 'E'],
+        ]
+    ]
+
+    store.nivel_mapa = [row[:] for row in store.mapas_de_niveles[0]]
+
+    # =====================================================
+    # 1. MOVIMIENTO Y COLISIONES
+    # =====================================================
+    def mover_mario(dx, dy):
+        if store.game_over: return
+
+        # Actualizar dirección
+        if dx > 0: store.mario_direccion = "derecha"
+        elif dx < 0: store.mario_direccion = "izquierda"
+        elif dy > 0: store.mario_direccion = "abajo" 
+        elif dy < 0: store.mario_direccion = "arriba"
+
+        store.mario_estado = "caminando"
+        store.mario_ultimo_movimiento = renpy.get_game_runtime()
+
+        # Calcular siguiente posición
+        tentative_x = store.mario_pos_x + dx
+        tentative_y = store.mario_pos_y + dy
+
+        # Limites del mapa
+        if not (0 <= tentative_x < len(store.nivel_mapa[0]) and 0 <= tentative_y < len(store.nivel_mapa)):
+            return
+
+        tipo_tile = store.nivel_mapa[tentative_y][tentative_x]
+
+        # Colisión con paredes
+        if tipo_tile == 'B':
+            return 
+            
+        # Si no hay pared, nos movemos
+        store.mario_pos_x = tentative_x
+        store.mario_pos_y = tentative_y
+
+        # ---> NUEVO: Guardar el paso para Toad <---
+        if store.toad_siguiendo:
+            store.historial_mario.append( (store.mario_pos_x, store.mario_pos_y) )
+                # ---> Lógica de Toad siguiendo a Mario <---
+        if store.toad_siguiendo and store.toad_pos_x != -1:
+            # NUEVO: Toad solo avanza si Mario está a más de 2 pasos de distancia en la lista
+            if len(store.historial_mario) > 2:
+                store.toad_tick_movimiento += 1
+                
+                if store.toad_tick_movimiento >= store.toad_velocidad_seguimiento:
+                    store.toad_tick_movimiento = 0 
+                    siguiente_paso = store.historial_mario.pop(0)
+                    store.toad_pos_x = siguiente_paso[0]
+                    store.toad_pos_y = siguiente_paso[1]
+                    
+                    # ---> NUEVO: LÓGICA PARA HABLAR AL CAMINAR <---
+                    tiempo_actual = renpy.get_game_runtime()
+                    # Solo habla si ha pasado suficiente tiempo desde su última frase
+                    if tiempo_actual - store.toad_ultimo_dialogo > store.toad_intervalo_dialogo:
+                        import random
+                        frase = random.choice(store.dialogos_toad_caminando)
+                        store.toad_ultimo_dialogo = tiempo_actual
+                        
+                        # Mostramos un pequeño cuadro de diálogo en la pantalla
+                        renpy.show_screen("dialogo_toad_flotante", frase=frase)
+
+        update_camera_position()
+        renpy.restart_interaction()
+
+        # Interacciones
+        if tipo_tile == 'S':
+            #store.nivel_mapa[tentative_y][tentative_x] = 'S' # con esta opción, la tienda desaparece al salir de ella XD
+            renpy.jump("visitar_tienda")
+            
+        elif tipo_tile == 'T':
+            if tentative_x == store.toad_pos_x and tentative_y == store.toad_pos_y:
+                store.puntuacion += 100
+                store.oro_actual += 100
+                store.toad_pos_x = -1 
+                store.toad_pos_y = -1
+                renpy.jump("hablar_con_toad")
+
+
+                
+        elif tipo_tile == 'C':
+            store.puntuacion += 10
+            store.nivel_mapa[tentative_y][tentative_x] = 'E' 
+
+        renpy.restart_interaction()
+
+    # =====================================================
+    # 2. CÁMARA
+    # =====================================================
+    def update_camera_position():
+        """
+        Ajusta la posición de la cámara para seguir a Mario,
+        pero se detiene en los bordes del mapa.
+        Retorna los offsets x e y de la cámara.
+        """
+        # Calcular la posición central de Mario en el mundo en píxeles
+        mario_world_center_x = store.mario_pos_x * store.TILE_SIZE + store.TILE_SIZE / 2
+        mario_world_center_y = store.mario_pos_y * store.TILE_SIZE + store.TILE_SIZE / 2
+
+        # El ancho y alto total del mapa en píxeles
+        map_width_pixels = len(store.nivel_mapa[0]) * store.TILE_SIZE
+        map_height_pixels = len(store.nivel_mapa) * store.TILE_SIZE
+
+        # Posición ideal de la cámara para centrar a Mario
+        ideal_camera_x_offset = int(store.SCREEN_WIDTH / 2 - mario_world_center_x)
+        ideal_camera_y_offset = int(store.SCREEN_HEIGHT / 2 - mario_world_center_y)
+
+        # Límites del desplazamiento de la cámara para X
+        max_offset_x = 0
+        min_offset_x = store.SCREEN_WIDTH - map_width_pixels
+
+        # Límites del desplazamiento de la cámara para Y (similar a X)
+        max_offset_y = 0
+        min_offset_y = store.SCREEN_HEIGHT - map_height_pixels
+
+        # Limitar el offset de la cámara en X
+        store.camera_x_offset = max(min_offset_x, min(max_offset_x, ideal_camera_x_offset))
+        # Limitar el offset de la cámara en Y
+        store.camera_y_offset = max(min_offset_y, min(max_offset_y, ideal_camera_y_offset))
+
+        # print(f"CAM_UPDATE: Mario en el mundo ({store.mario_pos_x}, {store.mario_pos_y}), Offset Cam: ({store.camera_x_offset}, {store.camera_y_offset})")
+        return store.camera_x_offset, store.camera_y_offset # Retorna ambos offsets
+
+    # =====================================================
+    # 3. INVENTARIO Y TIENDA
+    # =====================================================
+    def comprar_item(nombre_item, precio):
+        if store.oro_actual >= precio:
+            store.oro_actual -= precio
+            store.inventario[nombre_item] = store.inventario.get(nombre_item, 0) + 1
+            store.mensaje_tienda = f"¡Compraste {nombre_item.replace('_', ' ')}!"
+            store.color_mensaje_tienda = "#000"
+        else:
+            store.mensaje_tienda = "¡Oro insuficiente!"
+            store.color_mensaje_tienda = "#000"
+
+    def usar_item(nombre_item):
+        if nombre_item in store.inventario and store.inventario[nombre_item] > 0:
+            store.inventario[nombre_item] -= 1
+            if store.inventario[nombre_item] <= 0:
+                del store.inventario[nombre_item]
+            
+            if nombre_item == "pocion_roja":
+                store.vida += 20 # Ahora esta variable existe
+                renpy.notify("¡Vida recuperada!")
+
+            if nombre_item == "pocion_azul":
+                store.oro_actual += 20 
+                renpy.notify(f"¡Tienes {store.oro_actual} piezas de oro!")
+        else:
+            renpy.notify("¡No tienes ese item!")
+
+    # =====================================================
+    # 4. TICK PRINCIPAL
+    # =====================================================
+    def game_tick():
+        if store.game_over: return 
+
+        # Estado Idle
+        if store.mario_estado == "caminando" and (renpy.get_game_runtime() - store.mario_ultimo_movimiento > 0.15):
+            store.mario_estado = "idle"
+
+        # ---> Lógica del traje de Mario <---
+        if store.mario_traje_especial:
+            store.mario_traje_duracion -= 1
+            if store.mario_traje_duracion <= 0:
+                store.mario_traje_especial = False # Se acaba el tiempo, vuelve a la normalidad
+
+
+
+        # --- 3. Lógica de Toad ---
+        if store.toad_siguiendo and store.toad_pos_x != -1:
+            
+            # Guardamos la posición ANTES de moverlo para saber hacia dónde va
+            vieja_x = store.toad_pos_x
+            vieja_y = store.toad_pos_y
+
+            if len(store.historial_mario) > 2:
+                store.toad_tick_movimiento += 1
+                
+                if store.toad_tick_movimiento >= store.toad_velocidad_seguimiento:
+                    store.toad_tick_movimiento = 0 
+                    
+                    # Mover a Toad
+                    siguiente_paso = store.historial_mario.pop(0)
+                    store.toad_pos_x = siguiente_paso[0]
+                    store.toad_pos_y = siguiente_paso[1]
+                    
+                    # ---> NUEVA LÓGICA DE ANIMACIÓN DE TOAD <---
+                    # Si se movió, cambiamos su estado y dirección
+                    store.toad_estado = "caminando"
+                    
+                    # Comparar vieja posición con nueva para saber la dirección
+                    if store.toad_pos_x > vieja_x:
+                        store.toad_direccion = "derecha"
+                    elif store.toad_pos_x < vieja_x:
+                        store.toad_direccion = "izquierda"
+                    elif store.toad_pos_y > vieja_y:
+                        store.toad_direccion = "abajo"
+                    elif store.toad_pos_y < vieja_y:
+                        store.toad_direccion = "arriba"
+                        
+                    # Diálogo aleatorio
+                    tiempo_actual = renpy.get_game_runtime()
+                    if tiempo_actual - store.toad_ultimo_dialogo > store.toad_intervalo_dialogo:
+                        import random
+                        frase = random.choice(store.dialogos_toad_caminando)
+                        store.toad_ultimo_dialogo = tiempo_actual
+                        renpy.show_screen("dialogo_toad_flotante", frase=frase)
+            
+            # Si Toad no se mueve en este tick (porque no hay pasos o espera), ponlo en Idle
+            # Nota: Esto es un poco simplificado, funciona si se mueve a saltos
+            else:
+                # Si el historial está vacío y Mario está lejos, Toad se queda quieto visualmente
+                pass 
+
+        update_camera_position()
+        renpy.restart_interaction()
+
+        update_camera_position()
+        renpy.restart_interaction()
+
+    # =====================================================
+    # 5. RESETEO
+    # =====================================================
+    def reiniciar_juego():
+        store.puntuacion = 0
+        store.camera_x_offset = 0
+        store.camera_y_offset = 0
+        store.game_over = False
+        store.mario_pos_x = 0
+        store.mario_pos_y = 10
+        store.toad_pos_x = 25
+        store.toad_pos_y = 10
+        store.nivel_mapa = [row[:] for row in store.mapas_de_niveles[0]]
+
+
+
+
+# --- PANTALLAS ---
+
+screen start_screen():
+    modal True
+    frame:
+        xalign 0.5 yalign 0.5
+        vbox:
+            text "Super Mario Bros" style "title_text"
+            textbutton "Jugar" action [Function(reiniciar_juego), Jump("game_start")] style "menu_button"
+            textbutton "Salir" action Quit() style "menu_button"
+
+screen game_screen():
+    fixed:
+        # Fondo Parallax
+        #add "bg_level1_parallax" at Transform(xoffset=camera_x_offset * 0.5, yoffset=camera_y_offset * 0.5)
+
+        # Fondo que rellena toda la pantalla sin moverse
+        add "images/bg_level1_parallax.png" xysize (1920, 1080)
+        
+        # Dibujar Mapa
+        for r_idx, row in enumerate(nivel_mapa):
+            for c_idx, char in enumerate(row):
+                $ _display_x = c_idx * TILE_SIZE + camera_x_offset
+                $ _display_y = r_idx * TILE_SIZE + camera_y_offset
+
+                if char == 'B': 
+                    add "block_tile" xpos _display_x ypos _display_y
+
+                elif char == 'C': 
+                    add "coin_tile" xpos _display_x ypos _display_y
+
+                elif char == 'S': # Si la casilla es 'S', dibujamos la tienda
+                    add "tienda_img"  xpos _display_x ypos _display_y
+
+      
+
+        # Debug Grid
+        if debug_mode:
+            for r_idx, row in enumerate(nivel_mapa):
+                for c_idx, char in enumerate(row):
+                    $ _display_x = c_idx * TILE_SIZE + camera_x_offset
+                    $ _display_y = r_idx * TILE_SIZE + camera_y_offset
+                    text "[c_idx], [r_idx]" xpos _display_x ypos _display_y size 10 color "#FF0000"
+
+
+        # Dibujar Toad
+        if toad_pos_x != -1 and toad_pos_y != -1:
+            $ _toad_x = toad_pos_x * TILE_SIZE + camera_x_offset
+            $ _toad_y = toad_pos_y * TILE_SIZE + camera_y_offset
+            # CAMBIO AQUÍ:
+            add "toad_dinamico" xpos _toad_x ypos _toad_y
+
+        # Dibujar Mario
+        $ _mario_x = mario_pos_x * TILE_SIZE + camera_x_offset
+        $ _mario_y = mario_pos_y * TILE_SIZE + camera_y_offset
+        
+        # Comprobamos si lleva el traje especial
+        if store.mario_traje_especial:
+            add "mario_traje" xpos _mario_x ypos _mario_y
+        else:
+            add "mario_dinamico" xpos _mario_x ypos _mario_y
+
+
+        # Interfaz (Puntuación e Inventario)
+        frame:
+            xalign 0.99 yalign 0.0
+            background "#000000AA"
+            padding (10, 10)
+            vbox:
+                text "Puntos: [puntuacion]" color "#fff"
+                text "Oro: [oro_actual]" color "#FDFF6C"
+                text "Poción Roja: [inventario.get('pocion_roja', 0)]" color "#FF6CA7"
+                text "Poción Azul: [inventario.get('pocion_azul', 0)]" color "#B2FFE8"
+                
+        # Controles
+        key "repeat_K_LEFT" action Function(mover_mario, -1, 0)
+        key "repeat_K_RIGHT" action Function(mover_mario, 1, 0)
+        key "repeat_K_UP" action Function(mover_mario, 0, -1) 
+        key "repeat_K_DOWN" action Function(mover_mario, 0, 1)
+        key "K_LEFT" action Function(mover_mario, -1, 0)
+        key "K_RIGHT" action Function(mover_mario, 1, 0)
+        key "K_UP" action Function(mover_mario, 0, -1) 
+        key "K_DOWN" action Function(mover_mario, 0, 1)
+
+        # Teclas de Inventario (Ejemplo)
+        key "K_z" action Function(usar_item, "pocion_roja")
+        key "K_x" action Function(usar_item, "pocion_azul")
+
+        # Timer
+        timer 0.05 action Function(game_tick) repeat True
+
+
+# ------------------------------------------------------------
+# CUADRO DE DIÁLOGO FLOTANTE DE TOAD
+# ------------------------------------------------------------
+screen dialogo_toad_flotante(frase):
+    # Calcular posición de Toad
+    $ _toad_x = store.toad_pos_x * store.TILE_SIZE + store.camera_x_offset
+    $ _toad_y = store.toad_pos_y * store.TILE_SIZE + store.camera_y_offset
+
+    
+    # Burbuja + texto
+    fixed:
+        frame:
+            pos(_toad_x, _toad_y-150)  # depende de la posición del NPC (Toad)
+            background "#333333" 
+
+            vbox:
+                text "[frase]" align (.5, .5)  text_align 0.5 xmaximum 150 ymaximum 100 
+                timer 2.5 action Hide("dialogo_toad_flotante")
+        
+# ------------------------------------------------------------
+# ETIQUETAS DE HISTORIA (Ren'Py puro)
+# ------------------------------------------------------------
+label start:
+    jump game_start
+
+label game_start:
+    call screen game_screen
+
+label hablar_con_toad:
+    scene bg_level1_parallax 
+    show lolo_sp at left
+    show marcus_sp at right 
+    with dissolve
+    "Has encontrado a Lolo."
+    t "¡Hola Marcus! Gracias por encontrarme."
+    t "Aquí tienes 100 puntos de recompensa y 100 barras de oro."
+
+    # Configurar seguimiento
+    $ toad_siguiendo = True
+    $ toad_pos_x = mario_pos_x 
+    $ toad_pos_y = mario_pos_y
+    $ historial_mario = [] # Limpiamos el historial
+
+    hide toad_standing
+    # CAMBIO IMPORTANTE AQUÍ: Usar return en lugar de jump
+    jump game_start 
+
+
+label visitar_tienda:
+    call screen tienda_screen()
+
+
+screen tienda_screen():
+    modal True # Evita que el jugador se mueva mientras compra
+    
+    # Fondo semitransparente oscuro
+    #add Solid("#00000066")
+
+    add "images/tienda_bg.jpeg"
+    
+    frame:
+        xalign 0.5 yalign 0.5
+        padding (30, 30)
+        background "#2b2b2b"
+        
+        vbox:
+            xalign 0.5
+            
+            # Título
+            text "TIENDA DE LILY" size 36 color "#fff" xalign 0.5
+            
+            # Mensaje de feedback (Compra exitosa o error)
+            if mensaje_tienda != "":
+                text "[mensaje_tienda]" size 20 color color_mensaje_tienda xalign 0.5
+            
+            null height 20
+            
+            # Catálogo de items
+            frame:
+                background "#1a1a1a"
+                padding (15, 15)
+                xfill True
+                
+                vbox:
+                    spacing 10
+                    
+                    # Botón 1: Poción Roja
+                    hbox:
+                        xfill True
+                        text "Poción Roja (Curación)" size 22 color "#FFFFFF" min_width 300
+                        text "Precio: 50 oro" size 22 color "#FFD700" min_width 150
+                        textbutton "Comprar" action Function(comprar_item, "pocion_roja", 50) text_color "#00FF00" text_hover_color "#88FF88"
+                    
+                    # Botón 2: Poción Azul
+                    hbox:
+                        xfill True
+                        text "Poción Azul (Crea oro)" size 22 color "#FFFFFF" min_width 300
+                        text "Precio: 80 oro" size 22 color "#FFD700" min_width 150
+                        textbutton "Comprar" action Function(comprar_item, "pocion_azul", 80) text_color "#00FF00" text_hover_color "#88FF88"
+                            
+            null height 20
+            
+            # Muestra tu oro actual
+            text "Oro actual: [oro_actual]" size 24 color "#FFFFFF" xalign 0.5
+            
+            null height 10
+            
+            # Botón para salir de la tienda
+            textbutton "Volver al Mapa" action Jump("volver_al_mapa_desde_tienda") xalign 0.5 text_size 24 text_color "#FF4444" text_hover_color "#FF8888"
+
+
+
+label volver_al_mapa_desde_tienda:
+    # Simplemente devolvemos al jugador al mapa
+    jump game_start
+
+
+init:
+    image mario_idle = "mario_idle1.png"
+    image mario_walk_derecha = Animation("mario_walk_right_1.png", 0.2, "mario_walk_right_2.png", 0.2)
+    image mario_walk_izquierda = Animation("mario_walk_left_1.png", 0.2, "mario_walk_left_2.png", 0.2)
+    image mario_walk_arriba = Animation("mario_walk_down_1.png", 0.2, "mario_walk_down_2.png", 0.2)
+    image mario_walk_abajo = Animation("mario_walk_up_1.png", 0.2, "mario_walk_up_2.png", 0.2)
+    image mario_walk_salto = Animation("mario_walk_salto_1.png", 0.2, "mario_walk_salto_2.png", 0.2)
+    
+    image mario_dinamico = ConditionSwitch(
+        "mario_estado == 'idle'", "mario_idle", #"mario_saltando", "mario_walk_salto", # Usamos la de arriba como "pose de salto"
+        "mario_direccion == 'derecha'", "mario_walk_derecha",
+        "mario_direccion == 'izquierda'", "mario_walk_izquierda",
+        "mario_direccion == 'arriba'", "mario_walk_arriba",
+        "mario_direccion == 'abajo'", "mario_walk_abajo",
+        "True", "mario_idle" # Caso por defecto de seguridad
+    )
+
+
+    # --- Imágenes de TOAD ---
+    image toad_idle = "toad_idle1.png"
+    
+    # Nota: Asegúrate de tener estos archivos en la carpeta images
+    image toad_walk_derecha = Animation("toad_walk_right_1.png", 0.2, "toad_walk_right_2.png", 0.2)
+    image toad_walk_izquierda = Animation("toad_walk_left_1.png", 0.2, "toad_walk_left_2.png", 0.2)
+    
+    # CORRECCIÓN: "arriba" usa los archivos "up" y "abajo" usa los "down"
+    image toad_walk_arriba = Animation("toad_walk_up_1.png", 0.2, "toad_walk_up_2.png", 0.2)
+    image toad_walk_abajo = Animation("toad_walk_down_1.png", 0.2, "toad_walk_down_2.png", 0.2)
+    
+
+
+    # Imagen dinámica de Toad (Cambia según estado y dirección)
+    image toad_dinamico = ConditionSwitch(
+        "store.toad_estado == 'idle'", "toad_idle",
+        "store.toad_direccion == 'derecha'", "toad_walk_derecha",
+        "store.toad_direccion == 'izquierda'", "toad_walk_izquierda",
+        "store.toad_direccion == 'arriba'", "toad_walk_arriba",
+        "store.toad_direccion == 'abajo'", "toad_walk_abajo",
+        "True", "toad_idle" # Caso por defecto
+    )
+
+    # Definimos el movimiento de "rebote"
+    transform bloque_golpeado:
+        yoffset 0
+        linear 0.05 yoffset -10  # Sube rápido
+        linear 0.05 yoffset 0    # Baja rápido
+
+    transform camara_subir:
+        yalign 1.0 # Comienza abajo (mostrando el suelo/base)
+        linear 3.0 yalign 0.0 # Sube lentamente hasta el tope en 3 segundos
+
+init python:
+    def cerrar_todos_los_screens():
+            renpy.hide_screen("game_screen")
+            renpy.hide_screen("tienda_screen")
+            renpy.hide_screen("start_screen")
